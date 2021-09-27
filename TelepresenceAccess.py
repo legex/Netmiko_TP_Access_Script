@@ -33,21 +33,24 @@ class TelepresemceAccess:
         os.mkdir(dir_path)
         
         ssh_connect=ConnectHandler(**vc_endpoint)                                   #connection initiation
-        print('Connection established with:{}'.format(vc_endpoint['ip']))
-        destination_path = os.path.join(dir_path,vc_endpoint['ip'])
-        os.mkdir(destination_path)
-        destination_file = os.path.join(destination_path,vc_endpoint['ip']+'.txt')
-        access_file=open(destination_file,'a')
-        access_file.write("Accessing Video Unit: {}".format(vc_endpoint['ip'])+'\n')
-        access_file.write(ssh_connect.find_prompt())
-        access_file.write('\n==================================================\n')
+        try:
+            print('Connection established with:{}'.format(vc_endpoint['ip']))
+            destination_path = os.path.join(dir_path,vc_endpoint['ip'])
+            os.mkdir(destination_path)
+            destination_file = os.path.join(destination_path,vc_endpoint['ip']+'.txt')
+            access_file=open(destination_file,'a')
+            access_file.write("Accessing Video Unit: {}".format(vc_endpoint['ip'])+'\n')
+            access_file.write(ssh_connect.find_prompt())
+            access_file.write('\n==================================================\n')
         
-        print(ssh_connect.find_prompt())                                         
-        config_sent = ssh_connect.send_command(command_to_ep)                       #send command to device
-        access_file.write(config_sent)
-        access_file.write('\n==================================================\n')
-        print(config_sent)
-        access_file.close()
+            print(ssh_connect.find_prompt())                                         
+            config_sent = ssh_connect.send_command(command_to_ep)                       #send command to device
+            access_file.write(config_sent)
+            access_file.write('\n==================================================\n')
+            print(config_sent)
+            access_file.close()
+        except (NetMikoAuthenticationException,NetMikoTimeoutException):
+            print('Error Occured:', NetMikoAuthenticationException,NetMikoTimeoutException)
         
     
     
