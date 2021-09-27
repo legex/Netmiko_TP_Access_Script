@@ -3,6 +3,7 @@ from datetime import*
 import csv
 import os
 import sys
+
 class TelepresemceAccess:
 
     def __init__(self,**kwargs):
@@ -12,7 +13,6 @@ class TelepresemceAccess:
     def single_tp_access(self,hostname,target_user,target_pass,command_to_ep):
         '''
         Function to defile base information and initiate connection with units provided
-
         '''
         vc_endpoint = {
             'device_type':'cisco_tp',
@@ -25,12 +25,29 @@ class TelepresemceAccess:
         vc_endpoint['ip']= str(hostname)                                            #assigning new values to place holder
         vc_endpoint['username']=target_user
         vc_endpoint['password']= str(target_pass)
-
+        
+        
+        parent_dir='C:/Users/RCGR8654/Documents/'
+        create_dir= 'test'+str(date.today())
+        dir_path=os.path.join(parent_dir,create_dir)
+        os.mkdir(dir_path)
+        
         ssh_connect=ConnectHandler(**vc_endpoint)                                   #connection initiation
         print('Connection established with:{}'.format(vc_endpoint['ip']))
+        destination_path = os.path.join(dir_path,vc_endpoint['ip'])
+        os.mkdir(destination_path)
+        destination_file = os.path.join(destination_path,vc_endpoint['ip']+'.txt')
+        access_file=open(destination_file,'a')
+        access_file.write("Accessing Video Unit: {}".format(vc_endpoint['ip'])+'\n')
+        access_file.write(ssh_connect.find_prompt())
+        access_file.write('\n==================================================\n')
+        
         print(ssh_connect.find_prompt())                                         
         config_sent = ssh_connect.send_command(command_to_ep)                       #send command to device
+        access_file.write(config_sent)
+        access_file.write('\n==================================================\n')
         print(config_sent)
+        access_file.close()
         
     
     
@@ -72,7 +89,7 @@ class TelepresemceAccess:
             access_file.write('\n==================================================\n')
     
     
-        print(ssh_connect.find_prompt())                                         #Connection output
+            print(ssh_connect.find_prompt())                                         #Connection output
         for config_status in commands_to_ep:
             config_sent = ssh_connect.send_command(config_status)                #Sending command to accessed endpoints
             access_file.write(config_sent)
@@ -83,7 +100,7 @@ tp_access=TelepresemceAccess()
 
 user_action=input('What do we do today?\n Your options are: \n 1-Access one TP \n 2-Access Multiple TP \n Your Input:')
 
-if user_action==1 or user_action=='single tp access':
+if int(user_action) == 1 or user_action=='single tp access':
     print('Accessing 1 TP, Okay!\n Provide below info:')
     hostname = input('Target IP:')              
     target_user = input('Enter username:')
@@ -91,11 +108,21 @@ if user_action==1 or user_action=='single tp access':
     command_to_ep=input('send command:')
     tp_access.single_tp_access(hostname,target_user,target_pass,command_to_ep)
 
-elif user_action==2 or user_action=='multiple tp access':
+elif int(user_action) == 2 or user_action=='multiple tp access':
     print('Accessing multiple tps now, okay')
     target_user=input('Provide username:')
     target_pass=input('Provide Password:')
     vc_input_file="Test_file.csv" 
     command_file="commands.txt"
+    
+    start_time= datetime.now()
+    
     tp_access.multiple_access(vc_input_file,command_file)
-
+    
+    end_time= datetime.now()
+    
+    total_time = end_time - start_time
+    print(total_time)           #Time taken for all
+else:
+    print('Invalid input \n Closing program')
+    sys.exit()
