@@ -20,6 +20,7 @@ class TelepresemceAccess:
             'username':'',
             'password':'',
             'port':'22',
+            'timeout':3.5,
             }                                                                       #dictionary to store values
 
         vc_endpoint['ip']= str(hostname)                                            #assigning new values to place holder
@@ -27,7 +28,7 @@ class TelepresemceAccess:
         vc_endpoint['password']= str(target_pass)
         
         
-        parent_dir='C:/path/to/Documents/'
+        parent_dir='C:/Users/RCGR8654/Documents/'
         create_dir= 'test'+str(date.today())
         dir_path=os.path.join(parent_dir,create_dir)
         os.mkdir(dir_path)
@@ -49,8 +50,10 @@ class TelepresemceAccess:
             access_file.write('\n==================================================\n')
             print(config_sent)
             access_file.close()
-        except (NetMikoAuthenticationException,NetMikoTimeoutException):
-            print('Error Occured:', NetMikoAuthenticationException,NetMikoTimeoutException)
+        except (NetMikoAuthenticationException):
+            print('Authentication Failed')
+        except (NetMikoTimeoutException):
+            print('Connection failed')
         
     
     
@@ -67,37 +70,47 @@ class TelepresemceAccess:
                 vcunits.update({'username': target_user})
                 vcunits.update({'password':target_pass})
                 vcunits.update({'port':'22'})
+                vcunits.update({'timeout': 8})
                 vcunits.update({'global_delay_factor':1})
                 vcunits.pop('System Name')                          #Poping out extra attribute
                 vc_lst.append(vcunits)                                       #Adding dictionary to empty list
 
-        parent_dir='C:/path/to/Documents/'
+        parent_dir='C:/Users/RCGR8654/Documents/'
         create_dir= 'test'+str(date.today())
         dir_path=os.path.join(parent_dir,create_dir)
         os.mkdir(dir_path)
     
         for video_units in vc_lst:                                                  #loop to initiate connections for all items in list
-            ssh_connect=ConnectHandler(**video_units)
-            print("Accessing Video Unit: {}".format(video_units['ip']))
+            try:
+
+                ssh_connect=ConnectHandler(**video_units)
+                print("Accessing Video Unit: {}".format(video_units['ip']))
     
-            '''Creating new dir to save the o/p as per folders
-             and creating .txt files per endpoint with in folders
-            '''
-            destination_path = os.path.join(dir_path,video_units['ip'])
-            os.mkdir(destination_path)
-            destination_file = os.path.join(destination_path,video_units['ip']+'.txt')
-            access_file=open(destination_file,'a')
-            access_file.write("Accessing Video Unit: {}".format(video_units['ip'])+'\n')
-            access_file.write(ssh_connect.find_prompt())
-            access_file.write('\n==================================================\n')
+                '''Creating new dir to save the o/p as per folders
+                and creating .txt files per endpoint with in folders
+                '''
+                destination_path = os.path.join(dir_path,video_units['ip'])
+                os.mkdir(destination_path)
+                destination_file = os.path.join(destination_path,video_units['ip']+'.txt')
+                access_file=open(destination_file,'a')
+                access_file.write("Accessing Video Unit: {}".format(video_units['ip'])+'\n')
+                access_file.write(ssh_connect.find_prompt())
+                access_file.write('\n==================================================\n')
     
     
-            print(ssh_connect.find_prompt())                                         #Connection output
-        for config_status in commands_to_ep:
-            config_sent = ssh_connect.send_command(config_status)                #Sending command to accessed endpoints
-            access_file.write(config_sent)
-            access_file.write('\n==================================================\n')
-        access_file.close()
+                print(ssh_connect.find_prompt())                                         #Connection output
+                for config_status in commands_to_ep:
+                    config_sent = ssh_connect.send_command(config_status)                #Sending command to accessed endpoints
+                    access_file.write(config_sent)
+                    access_file.write('\n==================================================\n')
+                access_file.close()
+            except (NetMikoTimeoutException):
+                print('Connection Timeout')
+            except (NetMikoAuthenticationException):
+                print('Authentication Failed')
+            finally:
+                continue
+
 
 tp_access=TelepresemceAccess()
 
