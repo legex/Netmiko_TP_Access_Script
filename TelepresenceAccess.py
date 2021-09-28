@@ -28,7 +28,7 @@ class TelepresemceAccess:
         vc_endpoint['password']= str(target_pass)
         
         
-        parent_dir='C:/Users/RCGR8654/Documents/'
+        parent_dir='C:/path/to/Documents/'
         create_dir= 'test'+str(date.today())
         dir_path=os.path.join(parent_dir,create_dir)
         os.mkdir(dir_path)
@@ -75,7 +75,7 @@ class TelepresemceAccess:
                 vcunits.pop('System Name')                          #Poping out extra attribute
                 vc_lst.append(vcunits)                                       #Adding dictionary to empty list
 
-        parent_dir='C:/Users/RCGR8654/Documents/'
+        parent_dir='C:/path/to/Documents/'
         create_dir= 'test'+str(date.today())
         dir_path=os.path.join(parent_dir,create_dir)
         os.mkdir(dir_path)
